@@ -1,11 +1,22 @@
+# -*- coding: utf-8 -*-
+
 import os
-import collections
 import lexical_analyzer
 import sys
 
 
-def show_stat(projects_path, top_function):
-    wds = []
+def show_path_stat(path, top_function, top_size=10):
+    top = top_function(path, top_size=top_size)
+    for word, occurrence in top:
+        print(word, occurrence)
+
+
+def show_projects_stat(path, projects, top_function, top_size=10):
+    for word, occurrence in lexical_analyzer.get_top_for_projects_in_path(path, projects, top_function, top_size):
+        print(word, occurrence)
+
+
+if __name__ == '__main__':
     projects = [
         'django',
         'flask',
@@ -14,17 +25,6 @@ def show_stat(projects_path, top_function):
         'requests',
         'sqlalchemy',
     ]
-    for project in projects:
-        full_path = os.path.join(projects_path, project)
-        wds += top_function(full_path)
-
-    top_size = 200
-    print('total %s words, %s unique' % (len(wds), len(set(wds))))
-    for word, occurence in collections.Counter(wds).most_common(top_size):
-        print(word, occurence)
-
-
-if __name__ == '__main__':
     # default value for example
     path = '/usr/local/lib/python3.5/site-packages/'
     if len(sys.argv) > 1:
@@ -32,7 +32,13 @@ if __name__ == '__main__':
     if not os.path.isdir(path):
         print(path, "is not existing dir")
         sys.exit(0)
-    print("Top functions names in", path)
-    show_stat(path, lexical_analyzer.get_top_functions_names_in_path)
-    print("Top verbs in", path)
-    show_stat(path, lexical_analyzer.get_top_verbs_in_path)
+    print("Top verbs in function names in ", path)
+    show_projects_stat(path, projects, lexical_analyzer.get_top_verbs_in_function_names)
+    print("Top nouns in function names in ", path)
+    show_projects_stat(path, projects, lexical_analyzer.get_top_nouns_in_function_names)
+    print("Top verbs in variable names in ", path)
+    show_projects_stat(path, projects, lexical_analyzer.get_top_verbs_in_variable_names)
+    print("Top nouns in variable names in ", path)
+    show_projects_stat(path, projects, lexical_analyzer.get_top_nouns_in_variable_names)
+
+

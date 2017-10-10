@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
+
 import ast
 import os
-import collections
 
 from nltk import pos_tag
 
@@ -15,6 +16,13 @@ def is_verb(word):
         return False
     pos_info = pos_tag([word])
     return pos_info[0][1] == 'VB'
+
+
+def is_noun(word):
+    if not word:
+        return False
+    pos_info = pos_tag([word])
+    return pos_info[0][1] == 'NN'
 
 
 def file_to_tree(filename, with_file_names=False, with_file_content=False):
@@ -34,7 +42,8 @@ def file_to_tree(filename, with_file_names=False, with_file_content=False):
 
 
 def get_trees(path, with_file_names=False, with_file_content=False, print_debug=False):
-    print(path)
+    if print_debug:
+        print(path)
     file_names = []
     trees = []
     for dir_name, dirs, files in os.walk(path, topdown=True):
@@ -50,9 +59,33 @@ def get_trees(path, with_file_names=False, with_file_content=False, print_debug=
     return trees
 
 
-def get_all_names(tree):
-    return [node.id for node in ast.walk(tree) if isinstance(node, ast.Name)]
+def get_all_variables_names(tree):
+    return [node.id.lower() for node in ast.walk(tree) if isinstance(node, ast.Name)]
 
 
-def get_verbs_from_function_name(function_name):
-    return [word for word in function_name.split('_') if is_verb(word)]
+def get_all_function_names(tree):
+    return [node.name.lower() for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)]
+
+
+def split_snake_case_name_to_words(name, some_filter=None):
+    if some_filter is not None:
+        return [word for word in name.split('_') if some_filter(word)]
+    return [word for word in name.split('_') if word]
+
+
+def is_not_builtin_function(function_name):
+    return not (function_name.startswith('__') and function_name.endswith('__'))
+
+
+def sum_occurrence(top, add_words):
+    for word, cnt in add_words:
+        if word in top:
+            top[word] += cnt
+        else:
+            top[word] = cnt
+    return top
+
+
+def get_all_words_in_path(path, get_some_type):
+    trees = get_trees(path)
+    return [f for f in flat([get_some_type(t) for t in trees]) if is_not_builtin_function(f)]
