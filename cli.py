@@ -35,10 +35,10 @@ if __name__ == '__main__':
                         action="store_true")
     parser.add_argument("-s", "--speech_part",
                         help="Get top for specified speech part. Options: verb, noun",
-                        default="verb")
+                        type=str, default="verb")
     parser.add_argument("-n", "--name_type",
                         help="Get top for specified names type. Options: function_definition, variable",
-                        default="function_definition")
+                        type=str, default="function_definition")
     parser.add_argument("-t", "--top_size",
                         help="Top size",
                         type=int, default=10)

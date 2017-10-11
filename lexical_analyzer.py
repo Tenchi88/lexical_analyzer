@@ -10,11 +10,11 @@ def get_top_words_in_path(path, name_type, speech_part, top_size=10):
         raise ValueError(name_type + " not supported. Available types: [variable, function_definition]")
     if speech_part not in ["noun", "verb"]:
         raise ValueError(speech_part + " not supported. Available types: [noun, verb]")
-    if name_type is "variable":
+    if name_type == "variable":
         names = get_all_words_in_path(path, get_all_variables_names)
     else:
         names = get_all_words_in_path(path, get_all_function_names)
-    if speech_part is "noun":
+    if speech_part == "noun":
         words = flat([split_snake_case_name_to_words(name, is_noun) for name in names])
     else:
         words = flat([split_snake_case_name_to_words(name, is_verb) for name in names])
